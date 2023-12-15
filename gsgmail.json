@@ -16,7 +16,7 @@
     "latest_tested_versions": [
         "Cloud, May 26, 2023"
     ],
-    "app_version": "2.5.0",
+    "app_version": "2.5.1-fdse1",
     "product_version_regex": ".*",
     "license": "Copyright (c) 2017-2023 Splunk Inc.",
     "utctime_updated": "2022-01-25T00:07:36.000000Z",
@@ -1311,6 +1311,112 @@
                 "title": "Get Email",
                 "view": "gsgmail_view.get_email"
             }
+        },
+        {
+            "action": "change account label",
+            "description": "Change account lable i.e to SPAM to move sender into direct folder",
+            "type": "contain",
+            "verbose": "Action uses the GMail API. Requires authorization with the following scope: <b>https://mail.google.com</b>.",
+            "read_only": false,
+            "identifier": "move_message",
+            "parameters": {
+                "email": {
+                    "required": true,
+                    "description": "Email of the mailbox owner",
+                    "data_type": "string",
+                    "default": "me",
+                    "contains": [
+                        "email"
+                    ],
+                    "order": 0,
+                    "primary": true
+                },
+                "label_id": {
+                    "required": true,
+                    "description": "Label id of folder to which user want to move the message i.e SPAM or TRASH",
+                    "data_type": "string",
+                    "contains": [
+                        "gmail label id"
+                    ],
+                    "primary": true,
+                    "allow_list": true,
+                    "default": "SPAM",
+                    "order": 1
+                },
+                "from": {
+                    "required": true,
+                    "description": "Sender e-mail whose messages user want to transfer",
+                    "data_type": "string",
+                    "contains": [
+                        "gmail label id"
+                    ],
+                    "primary": true,
+                    "allow_list": true,
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.email",
+                    "data_type": "string",
+                    "contains": [
+                        "email"
+                    ],
+                    "example_values": [
+                        "admin@testcorp.biz"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.label_id",
+                    "data_type": "string",
+                    "contains": [
+                        "gmail label id"
+                    ],
+                    "example_values": [
+                        "SPAM",
+                        "CHAT",
+                        "SENT",
+                        "TRASH"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.from",
+                    "data_type": "string",
+                    "contains": [
+                        "email"
+                    ],
+                    "example_values": [
+                        "cat-enthusiasts@example.com"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "versions": "EQ(*)"
         }
     ],
     "pip39_dependencies": {

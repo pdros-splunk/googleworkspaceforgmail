@@ -622,6 +622,48 @@ class GSuiteConnector(BaseConnector):
         # Return success
         self.save_progress("Test Connectivity Passed")
         return action_result.set_status(phantom.APP_SUCCESS)
+    
+    def _handle_move_message(self, param):
+
+        # Implement the handler here, some basic code is already in
+
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        # Create the credentials with the required scope
+        scopes = [GSGMAIL_AUTH_GMAIL_ADMIN_DIR]
+
+        # Create a service here
+        self.save_progress("Creating AdminSDK service object")
+
+        ret_val, service = self._create_service(action_result, scopes, "admin", "directory_v1", self._login_email)
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        self.save_progress("Change sender messages label for domain: {0}".format(self._domain))
+
+        filter = {
+            'criteria': {
+                'from': param.get('from')
+            },
+            'action': {
+                'addLabelIds': [param.get('label_id')],
+                'removeLabelIds': ['INBOX']
+            }
+        }
+
+        try:
+            service_resp = service.users().settings().filters().create(userId=param.get('email'), body=filter).execute()
+        except Exception as e:
+            error_message = self._get_error_message_from_exception(e)
+            return action_result.set_status(phantom.APP_ERROR, GSGMAIL_USERS_FETCH_FAILED, error_message)
+        
+        action_result.add_data(service_resp)
+
+        return action_result.set_status(phantom.APP_SUCCESS, 'Label added successfully')
 
     def _get_email_ids_to_process(self, service, action_result, max_results, ingest_manner,
                                   user_id='me', labels=[], include_spam_trash=False, q=None, include_sent=False,
@@ -839,6 +881,8 @@ class GSuiteConnector(BaseConnector):
             ret_val = self._handle_on_poll(param)
         elif action_id == 'test_connectivity':
             ret_val = self._handle_test_connectivity(param)
+        elif action_id == 'move_message':
+            ret_val = self._handle_move_message(param)
 
         return ret_val
 
